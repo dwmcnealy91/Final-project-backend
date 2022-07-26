@@ -1,5 +1,5 @@
 import express from "express";
-import { ObjectId } from "mongodb";
+//import { ObjectId } from "mongodb";
 import { getClient } from "../db";
 import { Result } from "../GameFavorite";
 // import { ObjectId } from 'mongodb';
@@ -10,7 +10,11 @@ const routes = express.Router();
 routes.get("/wishlist", async (req, res) => {
   try {
     const client = await getClient();
-    const results = await client.db().collection("gamelist").find().toArray();
+    const results = await client
+      .db()
+      .collection("gamelist")
+      .find({}, { projection: { _id: 0 } })
+      .toArray();
     res.json(results); // send JSON results
   } catch (err) {
     console.error("FAIL", err);
@@ -19,6 +23,7 @@ routes.get("/wishlist", async (req, res) => {
 });
 
 routes.post("/wishlist", async (req, res) => {
+  console.log("backend adding game");
   const game = req.body as Result;
   try {
     const client = await getClient();
@@ -30,16 +35,20 @@ routes.post("/wishlist", async (req, res) => {
 });
 
 routes.delete("/wishlist/:id", async (req, res) => {
-  const id = req.params.id;
+  console.log("deleting game backend");
+  const { id } = req.params;
+  console.log(id);
   try {
     const client = await getClient();
     const result = await client
       .db()
       .collection<Result>("gamelist")
-      .deleteOne({ _id: new ObjectId(id) });
+      .deleteOne({ id: Number.parseInt(id) });
     if (result.deletedCount === 0) {
+      console.log("delete game again");
       res.status(404).json({ message: "Not Found" });
     } else {
+      console.log("samantha cummings");
       res.status(204).end();
     }
   } catch (err) {
