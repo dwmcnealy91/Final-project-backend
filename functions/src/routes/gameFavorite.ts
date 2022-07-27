@@ -10,11 +10,7 @@ const routes = express.Router();
 routes.get("/wishlist", async (req, res) => {
   try {
     const client = await getClient();
-    const results = await client
-      .db()
-      .collection("gamelist")
-      .find({}, { projection: { _id: 0 } })
-      .toArray();
+    const results = await client.db().collection("gamelist").find().toArray();
     res.json(results); // send JSON results
   } catch (err) {
     console.error("FAIL", err);
